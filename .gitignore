@@ -123,3 +123,10 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# MARC files
+*.mrc
+*.mrk
+
+# temp
+temp.py
