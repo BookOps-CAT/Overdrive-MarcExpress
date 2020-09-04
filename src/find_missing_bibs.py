@@ -10,8 +10,8 @@ def overdrive2list(fh, sierra_format):
     with open(fh, "r") as file:
         reader = csv.reader(file)
         for row in reader:
-            if sierra_format == row[8]:
-                olist.append(row[0])
+            if sierra_format == row[7]:
+                olist.append(row[6])
     print(f"Found {len(olist)} records in format {sierra_format}")
     return olist
 
@@ -21,8 +21,9 @@ def save2marc(marc_out, bib):
         file.write(bib.as_marc())
 
 
-def find_in_marc(marc_fh, oids, marc_out):
-    with open(marc_fh, "rb") as marc_in:
+def find_in_marc(marc_src, oids, sierra_format):
+    marc_out = f"./marc/BPL/missing-{sierra_format}.mrc"
+    with open(marc_src, "rb") as marc_in:
         reader = MARCReader(marc_in)
         matches_found = 0
         for bib in reader:
@@ -118,7 +119,11 @@ if __name__ == "__main__":
     # marc_out_eaudio = "./marc/BPL/missing-eaudio-2.mrc"
     # marc_out_ebook = "./marc/BPL/missing-ebook-2.mrc"
 
-    missing_ids = overdrive2list(report_fh, "x")
-    extract_ids_from_overdrive_marc(marc_obook, missing_ids, "x")
+    # missing_ids = overdrive2list(report_fh, "x")
+    # extract_ids_from_overdrive_marc(marc_obook, missing_ids, "x")
 
     # extract_ids_from_sierra_marc(marc_sierra, report_sierra_ids)
+
+    report = "./reports/BPL/missing-verified.csv"
+    oids = overdrive2list(report, "x")
+    find_in_marc(marc_obook, oids, "book")
