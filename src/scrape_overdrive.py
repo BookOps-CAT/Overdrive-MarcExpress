@@ -42,7 +42,7 @@ def get_html(url):
     """
 
     global timeout_count
-    time.sleep(1.5)
+    time.sleep(1.0)
     headers = {"user-agent": "tomaszkalata@bookops.org"}
     try:
         response = requests.get(url, headers=headers, timeout=TIME_OUT)
@@ -130,7 +130,7 @@ def update_status(metadata, ebook_status):
     return ebook_status
 
 
-def get_ebook_status(bNumber, html):
+def get_ebook_status(bid, html):
     """
     parses HTML, finds significant portion of metadata in document head, and
     interprets important bits, such as availability of ebook, ownership,
@@ -155,9 +155,14 @@ def get_ebook_status(bNumber, html):
     if found:
         ebook_status = update_status(metadata, ebook_status)
     else:
-        with open("./files/missing/{}.html".format(bNumber), "w") as file:
+        with open("./temp/missing/{}.html".format(bid), "w") as file:
             file.write(str(html))
     return ebook_status
+
+
+def construct_url(oid, lib):
+    if lib == "BPL":
+        return f"https://brooklyn.overdrive.com/media/{oid}"
 
 
 def scrape(src_fh, lib):
@@ -167,16 +172,28 @@ def scrape(src_fh, lib):
 
     with open(src_fh, "r") as csvfile:
         reader = csv.reader(csvfile)
+        next(reader)
         for row in reader:
-            url = row[3]
+            oid = row[0]
+            bid = row[1]
+            url = construct_url(oid, lib)
+
             doc = get_html(url)
             if doc:
-                status = get_ebook_status(row[0], doc)
-                # print(status)
+                # print(doc)
+                status = get_ebook_status(bid, doc)
+
                 if status != (None, None, None, None, None):
                     row.extend(status)
                     save2csv(report, row)
                 else:
                     save2csv(fh_out_undecoded, row)
             else:
+
                 save2csv(fh_out_failure, row)
+
+
+if __name__ == "__main__":
+    src = "./reports/BPL/expired-before-verification-idsonly.csv"
+    # src = "./reports/BPL/testdata4scraping.csv"
+    scrape(src, "BPL")
