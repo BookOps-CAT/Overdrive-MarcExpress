@@ -22,14 +22,22 @@ P = re.compile(r".*window.OverDrive.mediaItems = (\{.*\}\});.*", re.DOTALL)
 P_AVAILABLE = re.compile(r'.*"isAvailable":(true|false),".*', re.DOTALL)
 P_OWNED = re.compile(r'.*"isOwned":(true|false),".*', re.DOTALL)
 P_AVAILABLE_COPIES = re.compile(r'.*"availableCopies":(\d{1,}),".*', re.DOTALL)
+P_ALWAYS_AVAILABLE = re.compile(r'.*"availabilityType":"always".*', re.DOTALL)
 P_OWNED_COPIES = re.compile(r'.*"ownedCopies":(\d{1,}),".*', re.DOTALL)
 
 # ebook status data construct
 EbookStatus = namedtuple(
     "EbookStatus",
-    ["available", "owned", "copies_available", "copies_owned", "for_removal"],
+    [
+        "available",
+        "owned",
+        "always_available",
+        "copies_available",
+        "copies_owned",
+        "for_removal",
+    ],
 )
-EbookStatus.__new__.__defaults__ = (None, None, None, None, None)
+EbookStatus.__new__.__defaults__ = (None, None, None, None, None, None)
 
 
 def get_html(url):
@@ -62,7 +70,9 @@ def determine_for_removal(ebook_status):
     """
 
     """
-    if ebook_status.copies_owned:
+    if ebook_status.always_available is True:
+        return False
+    elif ebook_status.copies_owned:
         try:
             copies = int(ebook_status.copies_owned)
             if not copies:
@@ -111,6 +121,11 @@ def update_status(metadata, ebook_status):
         else:
             owned = None
         ebook_status = ebook_status._replace(owned=owned)
+
+    # always available
+    match_always_available = P_ALWAYS_AVAILABLE.match(metadata)
+    if match_always_available:
+        ebook_status = ebook_status._replace(always_available=True)
 
     # copies available
     match_copies_available = P_AVAILABLE_COPIES.match(metadata)
@@ -194,6 +209,6 @@ def scrape(src_fh, lib):
 
 
 if __name__ == "__main__":
-    src = "./reports/BPL/expired-before-verification-idsonly.csv"
+    src = "./reports/BPL/reinstate_access-alldata.csv"
     # src = "./reports/BPL/testdata4scraping.csv"
     scrape(src, "BPL")
