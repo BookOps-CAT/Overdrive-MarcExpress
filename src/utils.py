@@ -21,3 +21,8 @@ def save2csv(dst_fh, row):
             out.writerow(row)
         except UnicodeEncodeError:
             print(f"Unable to save {row[0]}")
+
+
+def save2marc(dst_fh, bib):
+    with open(dst_fh, "wb") as out:
+        out.write(bib.as_marc())
