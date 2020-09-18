@@ -25,18 +25,23 @@ def find_overdriveNo(bib):
             match = pattern.match(field["u"])
             if match:
                 oid = match.group(1)
-                return oid
+                return oid.upper()
 
 
 def process(marc_in, marc_out):
     with open(marc_in, "rb") as file:
         n = 0
+        missing_oid = 0
+        added_oid = 0
+        unable_oid = 0
         reader = MARCReader(file)
         for bib in reader:
             n += 1
             if not has_overdriveNo(bib):
+                missing_oid += 1
                 oid = find_overdriveNo(bib)
                 if oid is not None:
+                    added_oid += 1
                     bid = bib["907"]["a"]
                     print(f"processing record no {n}: {bid}, {oid}")
                     bib.remove_fields("037", "994", "948")  # remove MARS
@@ -59,9 +64,15 @@ def process(marc_in, marc_out):
                         subfields=["a", "tak/overdrive # added"],
                     )
                     bib.add_ordered_field(t947)
-                    save2marc(marc_out, bib)
+                    # save2marc(marc_out, bib)
+                else:
+                    save2marc("./marc/BPL/bpl-overdrive-unable-to-add-037.mrc", bib)
+                    unable_oid += 1
 
         print(f"Populated {n} records")
+        print(f"Found {missing_oid} records without oid in 037 tag.")
+        print(f"Added {added_oid} oids to records.")
+        print(f"Unable to add oid to {unable_oid} records")
 
 
 if __name__ == "__main__":

@@ -24,5 +24,5 @@ def save2csv(dst_fh, row):
 
 
 def save2marc(dst_fh, bib):
-    with open(dst_fh, "wb") as out:
+    with open(dst_fh, "ab") as out:
         out.write(bib.as_marc())
