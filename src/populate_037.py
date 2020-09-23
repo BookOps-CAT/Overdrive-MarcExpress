@@ -64,9 +64,9 @@ def process(marc_in, marc_out):
                         subfields=["a", "tak/overdrive # added"],
                     )
                     bib.add_ordered_field(t947)
-                    # save2marc(marc_out, bib)
+                    save2marc(marc_out, bib)
                 else:
-                    save2marc("./marc/BPL/bpl-overdrive-unable-to-add-037.mrc", bib)
+                    save2marc("./marc/BPL/bpl-overdrive-037-impossible.mrc", bib)
                     unable_oid += 1
 
         print(f"Populated {n} records")
@@ -77,6 +77,6 @@ def process(marc_in, marc_out):
 
 if __name__ == "__main__":
     process(
-        "./marc/BPL/bpl-sierra-all-200917-utf8.mrc",
+        "./marc/BPL/Overdrive-ALL-200918-utf8.mrc",
         "./marc/BPL/bpl-overdrive-037-populated.mrc",
     )
