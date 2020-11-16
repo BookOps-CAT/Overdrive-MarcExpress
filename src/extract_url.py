@@ -5,9 +5,7 @@ from utils import save2csv
 
 def find_url(bib):
     phrases = [
-        "link.overdrive.com/?websiteid=89",
-        "digitalbooks.brooklynpubliclibrary.org",
-        "https://brooklyn.overdrive.com/media/",
+        "link.overdrive.com/?website",
     ]
 
     for field in bib.get_fields("856"):
@@ -18,19 +16,23 @@ def find_url(bib):
                     return url
 
 
-def process(marc_fh, library):
+def process(marc_fh, library, sierra_format):
     with open(marc_fh, "rb") as file:
         reader = MARCReader(file)
         no = 0
         for bib in reader:
-            bibNo = bib["907"]["a"][1:]
-            bibFormat = bib["998"]["d"][0]
+            # bibNo = bib["907"]["a"][1:]
+            # bibFormat = bib["998"]["d"][0]
+            oid = bib["037"]["a"]
             no += 1
             url = find_url(bib)
 
-            save2csv(f"./reports/{library}/overdrive-urls.csv", [bibNo, bibFormat, url])
+            save2csv(
+                f"./reports/{library}/overdrive-{sierra_format}-urls-4scraping.csv",
+                [oid, url],
+            )
 
 
 if __name__ == "__main__":
-    fh = "./marc/BPL/Overdrive4deletion.mrc"
-    process(fh, "BPL")
+    fh = "./marc/NYPL/missing-eAudio-not-verified.mrc"
+    process(fh, "NYPL", "eAudio")
