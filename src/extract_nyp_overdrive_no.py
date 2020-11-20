@@ -70,6 +70,18 @@ def parse_sierra_bibs(marc_fh, report_fh):
                                 ],
                             )
 
+                if not found_oid:
+                    save2csv(
+                        "./reports/NYPL/sierra-marked-4-del-before-verification-no-reserveid.csv",
+                        [
+                            bibNo,
+                            controlNo,
+                            controlNoSrc,
+                            bibFormat,
+                            bibStatus,
+                        ],
+                    )
+
             except:
                 print(
                     f"Error on bib number: {no} : {sys.exc_info()[0]}:{sys.exc_info()[1]}"
@@ -127,8 +139,8 @@ if __name__ == "__main__":
 
     # parse_sierra_bibs(marc_fh, report_fh)
 
-    marc_fh = "./marc/NYPL/orig/od-nyp-all-ebook-utf8.mrc"
-    report_fh = "./reports/NYPL/od-nyp-all.csv"
-    sierra_format = "z"
+    marc_fh = "./marc/NYPL/sierra-marked-4-del-before-verfication.mrc"
+    report_fh = "./reports/NYPL/sierra-marked-4-del-before-verification.csv"
+    sierra_format = "unknown"
 
-    parse_overdiveNos(marc_fh, report_fh, sierra_format)
+    parse_sierra_bibs(marc_fh, report_fh)

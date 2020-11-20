@@ -143,7 +143,7 @@ def update_status(metadata, ebook_status):
     return ebook_status
 
 
-def get_ebook_status(oid, html):
+def get_ebook_status(oid, bid, html):
     """
     parses HTML, finds significant portion of metadata in document head, and
     interprets important bits, such as availability of ebook, ownership,
@@ -156,7 +156,7 @@ def get_ebook_status(oid, html):
     """
 
     ebook_status = EbookStatus()
-
+    found = False
     soup = BeautifulSoup(html, "html.parser")
     scripts = soup.find_all("script")
     for s in scripts:
@@ -168,36 +168,33 @@ def get_ebook_status(oid, html):
     if found:
         ebook_status = update_status(metadata, ebook_status)
     else:
-        with open("./temp/missing/{}.html".format(oid), "w") as file:
+        with open("./temp/missing/{}.html".format(bid), "w") as file:
             file.write(str(html))
     return ebook_status
 
 
-def construct_url(oid, lib):
-    if lib == "BPL":
-        return f"https://brooklyn.overdrive.com/media/{oid}"
+def construct_url(oid):
+    return f"https://nypl.overdrive.com/media/{oid}"
 
 
 def scrape(src_fh, lib, sierra_format):
-    report = f"./reports/{lib}/overdrive-scraped-{sierra_format}.csv"
-    fh_out_failure = f"./reports/{lib}/overdrive-scraped-failed-{sierra_format}.csv"
-    fh_out_undecoded = (
-        f"./reports/{lib}/overdrive-scraped-undecoded-{sierra_format}.csv"
-    )
+    report = f"./reports/{lib}/expired-scraped-{sierra_format}.csv"
+    fh_out_failure = f"./reports/{lib}/expired-scraped-failed-{sierra_format}.csv"
+    fh_out_undecoded = f"./reports/{lib}/expired-scraped-undecoded-{sierra_format}.csv"
 
     with open(src_fh, "r") as csvfile:
         reader = csv.reader(csvfile)
         next(reader)
         for row in reader:
             oid = row[0]
-            # bid = row[1]
-            # url = construct_url(oid, lib)
-            url = row[1]
+            bid = row[2]
+            url = construct_url(oid)
+            # url = row[1]
 
             doc = get_html(url)
             if doc:
                 # print(doc)
-                status = get_ebook_status(oid, doc)
+                status = get_ebook_status(oid, bid, doc)
 
                 if status != (None, None, None, None, None):
                     row.extend(status)
@@ -209,6 +206,6 @@ def scrape(src_fh, lib, sierra_format):
 
 
 if __name__ == "__main__":
-    src = "./reports/NYPL/overdrive-eBook-urls-4scraping.csv"
+    src = "./reports/NYPL/reinstate_access-alldata.csv"
     # src = "./reports/BPL/testdata4scraping.csv"
-    scrape(src, "NYPL", "eBook")
+    scrape(src, "NYPL", "Reinstate")
