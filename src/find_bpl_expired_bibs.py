@@ -80,7 +80,28 @@ def find_bib(creds):
         authorization=creds["client_key"], endpoint=creds["endpoint"]
     ) as session:
         response = session.search_bibNo(
-            keyword="b112411083", default_response_fields=False
+            keyword="11241108", default_response_fields=False
+        )
+        print(response.json())
+
+
+def find_isbn(creds):
+    with SolrSession(
+        authorization=creds["client_key"], endpoint=creds["endpoint"]
+    ) as session:
+        response = session.search_isbns(
+            keywords=["9781984850010"], default_response_fields=False
+        )
+        print(response.json())
+
+
+def find_reserveNo(creds):
+    with SolrSession(
+        authorization=creds["client_key"], endpoint=creds["endpoint"]
+    ) as session:
+        response = session.search_reserveId(
+            keyword="3B9FC49F-E3AD-41A1-9A34-611A4E6D5954".lower(),
+            default_response_fields=False,
         )
         print(response.json())
 
@@ -90,3 +111,5 @@ if __name__ == "__main__":
     creds = get_creds(cred_fh)
     # find_expired_bibs(creds)
     find_bib(creds)
+    # find_isbn(creds)
+    # find_reserveNo(creds)
